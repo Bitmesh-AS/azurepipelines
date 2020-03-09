@@ -13,6 +13,7 @@ Master is deployed to production and develop is published to test.
 
 the deploy-* files are templates.
 Use them as functions in your deployable project.
+To se how they are used have a look at "myreactapp-deploy.yml", "myngapp-deploy.yml" and "myservice-deploy.yml"
 
 ## Dev machin
 
@@ -21,6 +22,7 @@ Go to root. build with
 docker-compose build --build-arg configuration="docker"
 
 Add configuration for "docker". In angular app add in "environment.docker.ts". For react add ".env.local" for docker config.
+
 
 
 ## Bitmesh
