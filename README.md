@@ -24,4 +24,4 @@ docker-compose build --build-arg configuration="docker"
 In angular app add envinment speciffic config to "environment.docker.ts" for docker environment. For react add ".env.local" for docker environment.
 
 ## Bitmesh
-Bitmesh AS is building services and applications for PropTech. With our own framework we focus on IoT centric application development.
+Bitmesh AS is building services and applications for PropTech. With our framework we focus on IoT centric application development.
