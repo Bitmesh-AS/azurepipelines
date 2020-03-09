@@ -1,8 +1,4 @@
 # Azure Build Pipelines Templates
-Bitmesh AS is building services and applications where IoT has an esential role.
-We build all our solutions as event driven microservices or just functions.
-
-The services are hosted on Kubernetes in Azure.
 This reposetory has a set of docker and kubernest files that make environment configuration seamless and easy.
 On dev machin you can run the projects in docker with docker-compose.
 On commit deployments are automaticaly deployed to correct environment based on branch.
@@ -27,4 +23,5 @@ docker-compose build --build-arg configuration="docker"
 Add configuration for "docker". In angular app add in "environment.docker.ts". For react add ".env.local" for docker config.
 
 
-
+## Bitmesh
+Bitmesh AS is building services and applications for PropTech. With our own framework we focus on IoT centric application development.
