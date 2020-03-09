@@ -22,7 +22,7 @@ variables:
   kubernetes_test: 'Bitkube_dev'
 
 stages:
-   - template: deploy-service.yml # Template reference
+  - template: deploy-service.yml # Template reference
     parameters:
       name: myservice
       serviceName: myservice # must be same as yaml file in test and prod folder
