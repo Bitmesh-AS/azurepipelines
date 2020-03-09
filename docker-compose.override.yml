@@ -3,6 +3,15 @@ services:
   myservice:
     environment:
       - TEST_CONFIG=SOMETHING
+    ports:
+      - "8006:80"
   myngapp:
     environment:
       - TEST_CONFIG=SOMETHING
+    ports:
+      - "8007:80"
+  myreactapp:
+    environment:
+      - TEST_CONFIG=SOMETHING
+    ports:
+      - "8008:80"

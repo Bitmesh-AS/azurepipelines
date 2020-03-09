@@ -11,3 +11,8 @@ services:
     build:
       context: ./myngapp/
       dockerfile: Dockerfile
+  myreactapp:
+    image: myreactapp
+    build:
+      context: ./myreactapp/
+      dockerfile: Dockerfile
