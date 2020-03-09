@@ -1,0 +1,51 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: myreactapp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myreactapp
+    spec:
+      containers:
+      - name: myreactapp
+        image: bitmesh.azurecr.io/myreactapp:test-#{Build.BuildId}#
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: myregistrykey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myreactapp
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: myreactapp
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myreactapp-ingress  
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    certmanager.k8s.io/issuer: "letsencrypt-prod"
+    certmanager.k8s.io/acme-challenge-type: http01
+    ingress.kubernetes.io/cache-enable: "false"
+spec:   
+  rules:
+  - host: tmyreactapp.bitmesh.no
+    http:
+      paths:
+      - backend:
+          serviceName: myreactapp
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - tmyreactapp.bitmesh.no
+    secretName: myreactapp-tls

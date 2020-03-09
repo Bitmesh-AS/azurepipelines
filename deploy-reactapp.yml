@@ -1,0 +1,108 @@
+# Starter pipeline
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+# File: deploy-service.yml
+parameters:
+  name: ""
+  serviceName: ""
+  composeFile: "docker-compose.yml"
+  deploy: true
+
+stages:
+  - stage: Build_${{parameters.name}}
+    jobs:
+      - job: develop
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+        steps:
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            inputs:
+              targetFiles: |
+                ./test/${{parameters.serviceName}}.yaml
+              actionOnMissing: "warn"
+              tokenPrefix: "#{"
+              tokenSuffix: "}#"
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '${{parameters.serviceName}}'
+              command: 'build'
+              Dockerfile: ${{parameters.serviceName}}/Dockerfile
+              buildContext: ${{parameters.serviceName}}
+              tags: |
+                latest
+                test-$(Build.BuildId)
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '${{parameters.serviceName}}'
+              command: 'push'
+              tags: |
+                latest
+                test-$(Build.BuildId)
+          - task: CopyFiles@2
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+            inputs:
+              SourceFolder: "$(Build.SourcesDirectory)/test"
+              Contents: ${{parameters.serviceName}}.yaml
+              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          - task: Kubernetes@1
+            condition: and(and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop')), eq('${{parameters.deploy}}', 'true'))
+            inputs:
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceEndpoint: "$(kubernetes_test)"
+              namespace: "development"
+              command: "apply"
+              arguments: -f $(Build.ArtifactStagingDirectory)/${{parameters.serviceName}}.yaml
+              secretType: "dockerRegistry"
+              containerRegistryType: "Azure Container Registry"
+      - job: master
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        steps:
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            inputs:
+              targetFiles: |
+                ./prod/${{parameters.serviceName}}.yaml
+              actionOnMissing: "warn"
+              tokenPrefix: "#{"
+              tokenSuffix: "}#"
+          - task: CopyFiles@2
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)/${{parameters.serviceName}}/prod'
+              Contents: '*'
+              TargetFolder: '$(Build.SourcesDirectory)/${{parameters.serviceName}}'
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '${{parameters.serviceName}}'
+              command: 'build'
+              Dockerfile: ${{parameters.serviceName}}/Dockerfile
+              buildContext: ${{parameters.serviceName}}
+              tags: |
+                latest
+                $(Build.BuildId)
+          - task: Docker@2
+            inputs:
+              containerRegistry: '$(containerRegistry)'
+              repository: '${{parameters.serviceName}}'
+              command: 'push'
+              tags: |
+                latest
+                $(Build.BuildId)
+          - task: CopyFiles@2
+            condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+            inputs:
+              SourceFolder: "$(Build.SourcesDirectory)/prod"
+              Contents: ${{parameters.serviceName}}.yaml
+              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+          - task: Kubernetes@1
+            condition: and(and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master')), eq('${{parameters.deploy}}', 'true'))
+            inputs:
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceEndpoint: "$(kubernetes_prod)"
+              namespace: "production"
+              command: "apply"
+              arguments: -f $(Build.ArtifactStagingDirectory)/${{parameters.serviceName}}.yaml
+              secretType: "dockerRegistry"
+              containerRegistryType: "Azure Container Registry"

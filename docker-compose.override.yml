@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  myservice:
+    environment:
+      - TEST_CONFIG=SOMETHING
+  myngapp:
+    environment:
+      - TEST_CONFIG=SOMETHING

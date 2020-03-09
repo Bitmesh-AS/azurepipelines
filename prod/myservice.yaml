@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: myservice
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myservice
+    spec:
+      containers:
+      - name: myservice
+        image: bitmesh.azurecr.io/myservice:#{Build.BuildId}#
+        ports:
+        - containerPort: 80
+        env:
+          - name: TEST_CONFIG
+            value: SOMETHING
+      imagePullSecrets:
+      - name: myregistrykey
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: myservice
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myservice-ingress  
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    certmanager.k8s.io/issuer: "letsencrypt-prod"
+    certmanager.k8s.io/acme-challenge-type: http01
+    ingress.kubernetes.io/cache-enable: "false"
+spec:   
+  rules:
+  - host: myserviceapi.bitmesh.no
+    http:
+      paths:
+      - backend:
+          serviceName: myservice
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - myserviceapi.bitmesh.no
+    secretName: myserviceapi-tls
+

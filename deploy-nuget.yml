@@ -1,0 +1,58 @@
+# Starter pipeline
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+# File: deploy-service.yml
+parameters:
+  name: ""
+  serviceName: ""
+  composeFile: "docker-compose.yml"
+  deploy: true
+  webProject: false
+
+stages:
+  - stage: Build_${{parameters.name}}
+    jobs:
+      - job:
+        variables:
+          BUILD_BUILDNUMBER: "$(Build.BuildId)"
+        steps:
+          # Package a project
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "restore"
+              buildProperties: 'VersionSuffix="$(Build.BuildNumber)"'
+              projects: "./${{parameters.serviceName}}/${{parameters.serviceName}}.csproj"
+              feedsToUse: 'select'
+              vstsFeed: "BitmeshLib"
+              includeNuGetOrg: true              
+              selectOrConfig: 'select'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "build"
+              buildProperties: 'VersionSuffix="$(Build.BuildNumber)"'
+              projects: "./${{parameters.serviceName}}/${{parameters.serviceName}}.csproj"         
+              arguments: "--no-restore"
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "custom"
+              custom: "pack"
+              buildProperties: 'VersionSuffix="$(Build.BuildNumber)"'
+              packagesToPack: "./${{parameters.serviceName}}/${{parameters.serviceName}}.csproj"
+              # selectOrConfig: select
+              # externalEndpoints: "BitmeshLib"
+              # feedsToUse: 'select'
+              # vstsFeed: "BitmeshLib"
+              # feedRestore: "BitmeshLib"
+              arguments: './${{parameters.serviceName}}/${{parameters.serviceName}}.csproj --no-restore --no-build -o $(Build.ArtifactStagingDirectory) --version-suffix $(Build.BuildNumber)'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "push"
+              packagesToPush: "$(Build.ArtifactStagingDirectory)/${{parameters.serviceName}}*.nupkg"
+              nuGetFeedType: "internal"
+              publishVstsFeed: "BitmeshLib"
+              publishFeedCredentials: "BitmeshLib"
+              publishWebProjects: $(parameters.webProject)
+              versioningScheme: "byBuildNumber"
+              arguments: "--no-restore"

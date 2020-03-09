@@ -1,0 +1,29 @@
+# # Starter pipeline
+
+# # Start with a minimal pipeline that you can customize to build and deploy your code.
+# # Add steps that build, run tests, deploy, and more:
+# # https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - develop
+      - master
+  paths:
+    include:
+      - myservice/*
+pool:
+  vmImage: "ubuntu-latest"
+# Setup resources in azure devops. Project Settings/Service connections
+# Give the names of the resources in the variables below.
+variables:
+  containerRegistry: 'bitmesh acr'
+  kubernetes_prod: 'Bitkube_prod'
+  kubernetes_test: 'Bitkube_dev'
+
+stages:
+   - template: deploy-service.yml # Template reference
+    parameters:
+      name: myservice
+      serviceName: myservice # must be same as yaml file in test and prod folder
+

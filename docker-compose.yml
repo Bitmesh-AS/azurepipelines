@@ -1,0 +1,13 @@
+version: "3.4"
+
+services:
+  myservice:
+    image: myservice
+    build:
+      context: .
+      dockerfile: myservice/Dockerfile
+  myngapp:
+    image: myngapp
+    build:
+      context: ./myngapp/
+      dockerfile: Dockerfile

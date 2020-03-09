@@ -1,0 +1,15 @@
+.dockerignore
+.env
+.git
+.gitignore
+.vs
+.vscode
+docker-compose*.yml
+docker-compose.dcproj
+**/bin/
+**/obj/
+**/node_modules/
+!**/obj/Docker/publish/*
+!**/obj/Docker/empty/
+!bitmesh.lib.sln
+!device.service/*
