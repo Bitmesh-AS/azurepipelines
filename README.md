@@ -23,5 +23,8 @@ docker-compose build --build-arg configuration="docker"
 
 In angular app add envinment speciffic config to "environment.docker.ts" for docker environment. For react add ".env.local" for docker environment.
 
+## Kubernetes
+Kubernetes deployment files can be found in the "test" and "prod" folders.
+
 ## Bitmesh
 Bitmesh AS is building services and applications for PropTech. With our framework we focus on IoT centric application development.
